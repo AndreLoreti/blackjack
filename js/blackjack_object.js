@@ -35,8 +35,15 @@ class Blackjack {
      * Creates a new deck of cards.
      * @returns {Card[]} - An array of cards.
      */
-    newDeck() {
 
+    newDeck() {
+        const deck = [];
+        for (let suit = 1; suit <= 4; suit++) {
+            for (let value = 1; value <= 13; value++) {
+                deck.push({ suit, value });
+            }
+        }
+        return deck;
     }
 
     //TODO: Implement this method
@@ -46,7 +53,28 @@ class Blackjack {
      * @returns {Card[]} - The shuffled deck.
      */
     shuffle(deck) {
+        // Cria um array de índices de 0 até ao tamanho do baralho - 1
+        let indices = [];
+        for (let i = 0; i < deck.length; i++) {
+            indices.push(i);
+        }
+        
+        const shuffledDeck = [];
 
+        // Ciclo para retirar aleatoriamente cartas do baralho original usando os índices
+        for (let i = 0; i < deck.length; i++) {
+            // Sorteia um índice aleatório dentro do array de índices disponíveis
+            const randomIndex = Math.floor(Math.random() * indices.length);
+            const originalIndex = indices[randomIndex];
+
+            // Vai buscar a carta correspondente ao índice sorteado e insere no novo baralho
+            shuffledDeck.push(deck[originalIndex]);
+
+            // Remove o índice usado do array de índices para não ser sorteado novamente
+            indices.splice(randomIndex, 1);
+        }
+
+        return shuffledDeck;
     }
 
     /**
@@ -80,7 +108,33 @@ class Blackjack {
      * @returns {number} - The total value of the cards.
      */
     getCardsValue(cards) {
+        let totalPoints = 0;
+        let acesCount = 0;
 
+        // Itera sobre cada carta no array
+        for (let card of cards) {
+            const value = typeof card === 'number' ? card : card.value;
+            if (value === 1) {
+                // Ás: inicialmente contabilizamos como 11 e guardamos a contagem de Ázes
+                acesCount++;
+                totalPoints += 11;
+            } else if (value >= 11 && value <= 13) {
+                // Figuras (Valete, Dama, Rei) valem 10 pontos
+                totalPoints += 10;
+            } else {
+                // Cartas numéricas de 2 a 10 valem o seu próprio valor
+                totalPoints += value;
+            }
+        }
+
+        // Ajuste automático do Ás: se ultrapassarmos o limite (25) e tivermos Ázes contados como 11,
+        // convertemos o valor do Ás de 11 para 1 (subtraindo 10) até baixar a pontuação ou esgotar os Ázes.
+        while (totalPoints > Blackjack.MAX_POINTS && acesCount > 0) {
+            totalPoints -= 10;
+            acesCount--;
+        }
+
+        return totalPoints;
     }
 
     //TODO: Implement this method
@@ -89,7 +143,13 @@ class Blackjack {
      * @returns {Object} - The game state after the dealer's move.
      */
     dealerMove() {
-
+        // Retira a próxima carta do topo do baralho e adiciona às cartas do dealer
+        if (this.deck.length > 0) {
+            const card = this.deck.pop();
+            this.dealerCards.push(card);
+        }
+        // Atualiza e retorna o estado atual do jogo após a jogada
+        return this.getGameState();
     }
 
     //TODO: Implement this method
@@ -98,7 +158,13 @@ class Blackjack {
      * @returns {Object} - The game state after the player's move.
      */
     playerMove() {
-
+        // Retira a próxima carta do topo do baralho e adiciona às cartas do player
+        if (this.deck.length > 0) {
+            const card = this.deck.pop();
+            this.playerCards.push(card);
+        }
+        // Atualiza e retorna o estado atual do jogo após a jogada
+        return this.getGameState();
     }
 
     //TODO: Implement this method
@@ -107,6 +173,59 @@ class Blackjack {
      * @returns {Object} - The updated game state.
      */
     getGameState() {
+        const playerPoints = this.getCardsValue(this.playerCards);
+        const dealerPoints = this.getCardsValue(this.dealerCards);
 
+        let playerBusted = false;
+        let dealerBusted = false;
+        let playerWon = false;
+        let dealerWon = false;
+        let gameEnded = false;
+
+        // 1. Verificar se o jogador rebentou (> 25)
+        if (playerPoints > Blackjack.MAX_POINTS) {
+            playerBusted = true;
+            dealerWon = true;
+            gameEnded = true;
+        }
+        // 2. Verificar se o jogador fez exatamente 25 pontos (vitória imediata)
+        else if (playerPoints === Blackjack.MAX_POINTS) {
+            playerWon = true;
+            gameEnded = true;
+        }
+        // 3. Se for a vez do dealer ou se o jogador já tiver passado a vez
+        else if (this.dealerTurn) {
+            // Verificar se o dealer rebentou (> 25)
+            if (dealerPoints > Blackjack.MAX_POINTS) {
+                dealerBusted = true;
+                playerWon = true;
+                gameEnded = true;
+            } 
+            // O dealer continua a jogar até atingir pelo menos 21 pontos.
+            else if (dealerPoints >= Blackjack.DEALER_MAX_TURN_POINTS) {
+                gameEnded = true;
+                if (dealerPoints > playerPoints) {
+                    dealerWon = true;
+                } else if (dealerPoints < playerPoints) {
+                    playerWon = true;
+                } else {
+                    // Empate: dealerPoints === playerPoints (nenhum ganha por vitória direta, fica empate)
+                    // Conforme as regras, se forem iguais, o dealer para e o resultado é um empate (nenhum ganha isoladamente).
+                    playerWon = false;
+                    dealerWon = false;
+                }
+            }
+        }
+
+        // Atualiza o objeto state da classe
+        this.state = {
+            gameEnded: gameEnded,
+            playerWon: playerWon,
+            dealerWon: dealerWon,
+            playerBusted: playerBusted,
+            dealerBusted: dealerBusted
+        };
+
+        return this.state;
     }
 }
