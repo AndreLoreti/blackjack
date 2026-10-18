@@ -201,19 +201,16 @@ class Blackjack {
                 playerWon = true;
                 gameEnded = true;
             } 
-            // O dealer continua a jogar até atingir pelo menos 21 pontos.
-            else if (dealerPoints >= Blackjack.DEALER_MAX_TURN_POINTS) {
+            // O dealer para ao atingir 21, igualar o jogador ou chegar a 25.
+            else if (dealerPoints >= Blackjack.DEALER_MAX_TURN_POINTS ||
+                     dealerPoints === playerPoints ||
+                     dealerPoints === Blackjack.MAX_POINTS) {
                 gameEnded = true;
                 if (dealerPoints > playerPoints) {
                     dealerWon = true;
                 } else if (dealerPoints < playerPoints) {
                     playerWon = true;
-                } else {
-                    // Empate: dealerPoints === playerPoints (nenhum ganha por vitória direta, fica empate)
-                    // Conforme as regras, se forem iguais, o dealer para e o resultado é um empate (nenhum ganha isoladamente).
-                    playerWon = false;
-                    dealerWon = false;
-                }
+                } // Igualdade resulta num empate: ambas as flags de vitória ficam false.
             }
         }
 

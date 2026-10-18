@@ -7,7 +7,17 @@ let game = null; // Stores the current instance of the game
  * @param {Object} obj - The object to be debugged.
  */
 function debug(obj) {
-    document.getElementById('debug').innerHTML = JSON.stringify(obj); // Displays the state of the object as JSON
+    // Não expõe a segunda carta do dealer nem o baralho por comprar.
+    const safeState = {
+        dealerCards: obj.dealerCards.map((card, index) =>
+            !obj.state.gameEnded && index === 1 ? 'X' : card
+        ),
+        playerCards: obj.playerCards,
+        dealerTurn: obj.dealerTurn,
+        state: obj.state,
+        cardsRemaining: obj.deck.length
+    };
+    document.getElementById('debug').textContent = JSON.stringify(safeState);
 }
 
 /**
@@ -44,18 +54,15 @@ function newGame() {
     clearPage();
     game = new Blackjack(); // Creates a new instance of the Blackjack game
     game.dealerMove();
-    game.dealerMove();
     game.playerMove();
+    game.dealerMove();
     const state = game.playerMove();
 
     updateDealer(state);
     updatePlayer(state);
     debug(game);
     buttonsInitialization();
-
-    if (state.gameEnded) {
-        finalizeButtons();
-    }
+    if (state.gameEnded) finalizeButtons();
 }
 
 /**
@@ -104,7 +111,7 @@ function formatCard(card) {
 function updateDealer(state = game.getGameState()) {
     const cards = game.getDealerCards();
     const visibleCards = cards.map((card, index) =>
-        !state.gameEnded && index === 1 ? '.' : formatCard(card)
+        !state.gameEnded && index === 1 ? 'Carta' : formatCard(card)
     );
     let dealerText = visibleCards.join(' ');
 
@@ -170,9 +177,7 @@ function dealerNewCard() {
 function playerNewCard() {
     const state = game.playerMove();
     updatePlayer(state);
-    if (state.gameEnded) {
-        updateDealer(state);
-    }
+    if (state.gameEnded) updateDealer(state); // Revela as cartas do dealer no fim.
     debug(game);
     return state;
 }
