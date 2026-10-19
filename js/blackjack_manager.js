@@ -26,6 +26,7 @@ function debug(obj) {
 function buttonsInitialization() {
     document.getElementById('card').disabled = false; // Enables the button to draw a card
     document.getElementById('stand').disabled = false; // Enables the button to stand
+    document.getElementById('double_down').disabled = game.getPlayerCards().length !== 2;
     document.getElementById('new_game').disabled = true; // Disables the button for a new game
 }
 
@@ -35,6 +36,7 @@ function buttonsInitialization() {
 function finalizeButtons() {
     document.getElementById('card').disabled = true; // Disables the button to draw a card
     document.getElementById('stand').disabled = true; // Disables the button to stand
+    document.getElementById('double_down').disabled = true;
     document.getElementById('new_game').disabled = false; // Enables the button for a new game
 }
 
@@ -175,6 +177,7 @@ function dealerNewCard() {
  * @returns {Object} - The game state after the player's move.
  */
 function playerNewCard() {
+    document.getElementById('double_down').disabled = true;
     const state = game.playerMove();
     updatePlayer(state);
     if (state.gameEnded) updateDealer(state); // Revela as cartas do dealer no fim.
@@ -183,9 +186,25 @@ function playerNewCard() {
 }
 
 /**
+ * Draws exactly one card for the player, then finishes the player's turn.
+ */
+function doubleDown() {
+    if (!game || game.getGameState().gameEnded || game.getPlayerCards().length !== 2) return;
+
+    document.getElementById('double_down').disabled = true;
+    const state = game.playerMove();
+    updatePlayer(state);
+    updateDealer(state);
+    debug(game);
+
+    if (!state.gameEnded) dealerFinish();
+}
+
+/**
  * Finishes the dealer's turn.
  */
 function dealerFinish() {
+    document.getElementById('double_down').disabled = true;
     game.setDealerTurn(true);
     let state = game.getGameState();
 

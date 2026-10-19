@@ -46,6 +46,9 @@
       <!-- Button for the player to stand (end their turn) -->
       <button class="btn btn-secondary" id="stand" type="button" onclick="dealerFinish()">Stand</button>
 
+      <!-- Draw exactly one card, then automatically pass the turn to the dealer -->
+      <button class="btn btn-warning" id="double_down" type="button" onclick="doubleDown()" disabled>Double Down</button>
+
       <!-- Button to start a new game, initially disabled -->
       <button class="btn btn-success" id="new_game" type="button" onclick="newGame()" disabled>New Game</button>
     </section>
