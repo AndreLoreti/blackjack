@@ -4,3 +4,262 @@
   font-weight: normal;
   font-style: normal;
 }
+
+/* FAZ A MESA OCUPAR A JANELA */
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 320px;
+  overflow: hidden;
+  font-family: Arial, Helvetica, sans-serif;
+  color: white;
+}
+
+.game-table{
+  position: relative; /* Permite posicionar os elementos relativamente à mesa */
+  width: 100%;
+  height: 100vh;
+  min-height: 440px;
+  overflow: hidden;
+
+  background:
+    #790c18
+    url("../img/png/background.png")
+    center / 100% 100% no-repeat;
+}
+
+/* POSICIONA DEALER E JOGADOR */
+
+.dealer-area,
+.player-area {
+  position: absolute;
+  text-align: center;
+}
+
+.dealer-area {
+  top: 12%;
+  left: 31%;
+  width: 38%;
+}
+
+.player-area {
+  top: 48%;
+  left: 23%;
+  width: 54%;
+}
+
+.dealer-area h2,
+.player-area h2 {
+  margin: 5px 0 12px;
+  font-size: clamp(18px, 2.6vw, 24px);
+}
+
+.card-row {
+  display: flex;
+  min-height: 105px;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(8px, 2vw, 30px);
+}
+
+.playing-card {
+  display: block;
+  width: clamp(45px, 8vw, 78px);
+  height: auto;
+  max-height: 112px;
+  object-fit: contain;
+  border-radius: 5px;
+}
+
+/* ARRANJA AS CARTAS EM FILAS */
+.card-row {
+  display: flex;
+  min-height: 105px;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(8px, 2vw, 30px);
+}
+
+.playing-card {
+  display: block;
+  width: clamp(45px, 8vw, 78px);
+  height: auto;
+  max-height: 112px;
+  object-fit: contain;
+  border-radius: 5px;
+}
+
+/* COLOCA OS CAMPOS E A PILHA DE CARTAS */
+
+.new-game {
+  position: absolute;
+  top: 12%;
+  left: 7.5%;
+  width: 165px;
+  height: 52px;
+}
+
+.table-info {
+  position: absolute;
+  top: 10.5%;
+  right: 7.5%;
+  font-size: clamp(16px, 2.8vw, 23px);
+  font-weight: 600;
+  color: white;
+}
+
+.table-info p {
+  margin: 0 0 6px;
+}
+
+.table-info label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.8em;
+}
+
+.table-info input {
+  width: 120px;
+  padding: 5px 8px;
+  border: 1px solid white;
+  border-radius: 4px;
+  background: transparent;
+  color: white;
+  font-size: 16px;
+}
+
+.table-info input:disabled {
+  color: white;
+  opacity: 1;
+}
+
+.shoe {
+  position: absolute;
+  top: 43%;
+  left: 3%;
+  width: 88px;
+  height: 105px;
+}
+
+.shoe img {
+  position: absolute;
+  width: 78%;
+  border-radius: 5px;
+}
+
+.shoe img:nth-child(1) {
+  left: 0;
+  top: 12px;
+  transform: rotate(-13deg);
+}
+
+.shoe img:nth-child(2) {
+  left: 9px;
+  top: 5px;
+  transform: rotate(-4deg);
+}
+
+.shoe img:nth-child(3) {
+  left: 17px;
+  top: 0;
+  transform: rotate(8deg);
+}
+
+/* COLOCA OS CONTROLOS EM BAIXO */
+.game-actions {
+  position: absolute;
+  left: 50%;
+  bottom: 7.5%;
+  display: flex;
+  width: min(52%, 500px);
+  justify-content: space-between;
+  gap: 14px;
+  transform: translateX(-50%);
+}
+
+.game-button {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 52px;
+  border: 0;
+  padding: 0;
+  appearance: none;
+  background-color: transparent;
+  color: white;
+  font: 800 20px Arial, sans-serif;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.game-button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+/* USAR O SPRITE DOS BOTÕES */
+.game-button {
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.new-game {
+  background-image: url("../img/png/button_new_game.png");
+}
+
+.stand-button {
+  background-image: url("../img/png/button_stand.png");
+}
+
+.hit-button {
+  background-image: url("../img/png/button_hit.png");
+}
+
+.double-button {
+  background-image: url("../img/png/button_double.png");
+}
+
+.game-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ECRÃS MAIS PEQUENOS */
+@media (max-width: 650px) {
+  body {
+    overflow: auto;
+  }
+
+  .game-table {
+    min-height: 680px;
+    background-size: auto 100%;
+  }
+
+  .dealer-area {
+    top: 25%;
+    left: 15%;
+    width: 70%;
+  }
+
+  .player-area {
+    top: 53%;
+    left: 8%;
+    width: 84%;
+  }
+
+  .game-actions {
+    bottom: 8%;
+    width: 76%;
+    gap: 8px;
+  }
+}

@@ -26,66 +26,64 @@
 </head>
 
 <body>
-  <!-- Header section containing the game title -->
-  <header class="container">
-    <h1>Blackjack 25</h1> <!-- Main heading for the game -->
-  </header>
+  <main class="game-table" aria-label="Blackjack 25">
 
-  <main class="container">
-    <!-- Main game section -->
-    <section id="game">
-      <h2>Dealer</h2> <!-- Subheading for the dealer's section -->
-      <p id="dealer"></p> <!-- Placeholder for displaying dealer's cards -->
+    <button id="new_game" class="game-button new-game"
+            type="button" onclick="newGame()">
+      New Game
+    </button>
 
-      <h2>Player</h2> <!-- Subheading for the player's section -->
-      <p id="player"></p> <!-- Placeholder for displaying player's cards -->
+    <aside class="table-info">
+      <p>Bet: <span id="bet-display">$10</span></p>
+      <p>Balance: <span id="balance-display">$1,000</span></p>
+      <label for="bet-amount">Wager</label>
+      <input id="bet-amount" type="number" min="10" step="1" value="10"
+             aria-label="Bet amount" oninput="bettingSystem.updateDisplay()">
+    </aside>
 
-      <!-- Button for the player to draw a new card -->
-      <button class="btn btn-primary" id="card" type="button" onclick="playerNewCard()">Card</button>
+    <div class="shoe" aria-hidden="true">
+      <img src="img/png/card_back.png" alt="">
+      <img src="img/png/card_back.png" alt="">
+      <img src="img/png/card_back.png" alt="">
+    </div>
 
-      <!-- Button for the player to stand (end their turn) -->
-      <button class="btn btn-secondary" id="stand" type="button" onclick="dealerFinish()">Stand</button>
-
-      <!-- Draw exactly one card, then automatically pass the turn to the dealer -->
-      <button class="btn btn-warning" id="double_down" type="button" onclick="doubleDown()" disabled>Double Down</button>
-
-      <!-- Button to start a new game, initially disabled -->
-      <button class="btn btn-success" id="new_game" type="button" onclick="newGame()" disabled>New Game</button>
+    <section class="dealer-area" aria-label="Dealer">
+      <div id="dealer-cards" class="card-row"></div>
+      <h2 id="dealer">Dealer: ?</h2>
     </section>
 
-    <!-- Section to display the game's status and messages -->
-    <section id="game_status">
-      <!-- This will be populated dynamically during the game -->
+    <section class="player-area" aria-label="Player">
+      <h2 id="player">Hand: 0</h2>
+      <div id="player-cards" class="card-row"></div>
     </section>
 
-    <!-- Debugging section for developers to view game state -->
-    <section id="sec_debug">
-      <h2>Debug</h2> <!-- Subheading for the debug section -->
-      <p id="debug">
-        <!-- Placeholder for displaying debug information -->
-      </p>
-    </section>
+    <nav class="game-actions" aria-label="Game actions">
+      <button id="stand" class="game-button stand-button"
+              type="button" onclick="dealerFinish()" disabled>Stand</button>
+
+      <button id="card" class="game-button hit-button"
+              type="button" onclick="playerNewCard()" disabled>Hit</button>
+
+      <button id="double_down" class="game-button double-button"
+              type="button" onclick="doubleDown()" disabled>Double</button>
+    </nav>
+
+    <p id="game_status" class="game-status" aria-live="polite"></p>
+    <p id="debug" class="visually-hidden" aria-hidden="true"></p>
+    <audio id="new-card-sound" src="audio/Newcard.mp3" preload="auto"></audio>
   </main>
 
-  <!-- Footer section, currently empty -->
-  <footer class="container">
-    <!-- Any footer content can be added here -->
-  </footer>
+  <script src="js/blackjack_object.js"></script>
+  <script src="js/blackjack_manager.js"></script>
 
   <!-- Link to Bootstrap's JavaScript bundle for interactive components -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
 
-  <!-- Link to the JavaScript file containing the Blackjack game logic -->
-  <script src="js/blackjack_object.js"></script>
-
-  <!-- Link to the JavaScript file for managing game actions and events -->
-  <script src="js/blackjack_manager.js"></script>
-
-  <!-- Execute the newGame function when the window loads to start the game -->
+  <script src="js/betting_balance.js"></script>
   <script>
-    window.onload = newGame; // Initializes a new game on page load
+    window.onload = bettingSystem.initialize.bind(bettingSystem);
   </script>
 </body>
 
