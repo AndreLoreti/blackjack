@@ -1,3 +1,4 @@
+/* Regista a fonte local. Só os botões usam esta família mais abaixo. */
 @font-face {
   font-family: "TAN Headline";
   src: url("../fonts/TAN-Headline/TANHEADLINE-Regular.ttf") format("truetype");
@@ -5,13 +6,13 @@
   font-style: normal;
 }
 
-/* FAZ A MESA OCUPAR A JANELA */
-
+/* Faz com que padding e border sejam incluídos nas dimensões dos elementos. */
 * {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   min-height: 100%;
   margin: 0;
@@ -19,26 +20,24 @@ html, body {
 
 body {
   min-width: 320px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   font-family: Arial, Helvetica, sans-serif;
   color: white;
 }
 
-.game-table{
-  position: relative; /* Permite posicionar os elementos relativamente à mesa */
+/* A mesa é o referencial de posicionamento para os elementos do jogo. */
+.game-table {
+  position: relative;
   width: 100%;
-  height: 100vh;
-  min-height: 440px;
+  height: 100vh; /* Fallback para browsers sem suporte a svh. */
+  height: 100svh;
+  min-height: 520px;
   overflow: hidden;
-
-  background:
-    #790c18
-    url("../img/png/background.png")
-    center / 100% 100% no-repeat;
+  background: #790c18 url("../img/png/background.png") center / 100% 100% no-repeat;
 }
 
-/* POSICIONA DEALER E JOGADOR */
-
+/* Dealer e jogador ocupam duas zonas fixas da mesa. */
 .dealer-area,
 .player-area {
   position: absolute;
@@ -63,14 +62,17 @@ body {
   font-size: clamp(18px, 2.6vw, 24px);
 }
 
+/* Flexbox centra as cartas; wrap permite uma nova linha se a mão crescer. */
 .card-row {
   display: flex;
   min-height: 105px;
   justify-content: center;
   align-items: flex-start;
+  flex-wrap: wrap;
   gap: clamp(8px, 2vw, 30px);
 }
 
+/* As imagens mantêm a proporção original das cartas PNG. */
 .playing-card {
   display: block;
   width: clamp(45px, 8vw, 78px);
@@ -80,26 +82,7 @@ body {
   border-radius: 5px;
 }
 
-/* ARRANJA AS CARTAS EM FILAS */
-.card-row {
-  display: flex;
-  min-height: 105px;
-  justify-content: center;
-  align-items: flex-start;
-  gap: clamp(8px, 2vw, 30px);
-}
-
-.playing-card {
-  display: block;
-  width: clamp(45px, 8vw, 78px);
-  height: auto;
-  max-height: 112px;
-  object-fit: contain;
-  border-radius: 5px;
-}
-
-/* COLOCA OS CAMPOS E A PILHA DE CARTAS */
-
+/* Botão de iniciar jogo no canto superior esquerdo. */
 .new-game {
   position: absolute;
   top: 12%;
@@ -108,17 +91,22 @@ body {
   height: 52px;
 }
 
+/* Aposta, saldo e campo para escolher a aposta. */
 .table-info {
   position: absolute;
   top: 10.5%;
   right: 7.5%;
+  /* Reserva uma coluna estável: valores grandes quebram linha sem deslocar a mesa. */
+  width: min(25%, 270px);
+  min-width: 0;
+  color: white;
   font-size: clamp(16px, 2.8vw, 23px);
   font-weight: 600;
-  color: white;
 }
 
 .table-info p {
   margin: 0 0 6px;
+  overflow-wrap: anywhere;
 }
 
 .table-info label {
@@ -142,6 +130,7 @@ body {
   opacity: 1;
 }
 
+/* Pilha decorativa feita com três cartas sobrepostas. */
 .shoe {
   position: absolute;
   top: 43%;
@@ -156,25 +145,11 @@ body {
   border-radius: 5px;
 }
 
-.shoe img:nth-child(1) {
-  left: 0;
-  top: 12px;
-  transform: rotate(-13deg);
-}
+.shoe img:nth-child(1) { left: 0; top: 12px; transform: rotate(-13deg); }
+.shoe img:nth-child(2) { left: 9px; top: 5px; transform: rotate(-4deg); }
+.shoe img:nth-child(3) { left: 17px; top: 0; transform: rotate(8deg); }
 
-.shoe img:nth-child(2) {
-  left: 9px;
-  top: 5px;
-  transform: rotate(-4deg);
-}
-
-.shoe img:nth-child(3) {
-  left: 17px;
-  top: 0;
-  transform: rotate(8deg);
-}
-
-/* COLOCA OS CONTROLOS EM BAIXO */
+/* Os três controlos ficam juntos e centrados perto da margem inferior. */
 .game-actions {
   position: absolute;
   left: 50%;
@@ -187,17 +162,38 @@ body {
 }
 
 .game-button {
+  display: inline-flex;
   flex: 1 1 0;
   min-width: 0;
   height: 52px;
-  border: 0;
+  align-items: center;
+  justify-content: center;
   padding: 0;
+  border: 0;
   appearance: none;
   background-color: transparent;
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
   color: white;
-  font: 800 20px Arial, sans-serif;
+  font: 800 20px "TAN Headline", Arial, sans-serif;
   text-transform: uppercase;
   cursor: pointer;
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+/* Cada botão usa o respetivo PNG já recortado. */
+.new-game { background-image: url("../img/png/button_new_game.png"); }
+.stand-button { background-image: url("../img/png/button_stand.png"); }
+.hit-button { background-image: url("../img/png/button_hit.png"); }
+.double-button { background-image: url("../img/png/button_double.png"); }
+
+/* Realça os botões disponíveis ao passar o rato por cima. */
+@media (hover: hover) {
+  .game-button:not(:disabled):hover {
+    filter: brightness(1.18) drop-shadow(0 3px 5px rgb(0 0 0 / 45%));
+    transform: translateY(-3px) scale(1.03);
+  }
 }
 
 .game-button:disabled {
@@ -205,61 +201,119 @@ body {
   cursor: not-allowed;
 }
 
-/* USAR O SPRITE DOS BOTÕES */
-.game-button {
-  background-position: center;
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
+/* Dá um foco visível quando os botões são usados pelo teclado. */
+.game-button:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
 }
 
-.new-game {
-  background-image: url("../img/png/button_new_game.png");
+/* O manager só preenche este elemento no final, quando mostra o resultado. */
+.game-status {
+  position: absolute;
+  z-index: 5;
+  top: 50%;
+  left: 50%;
+  display: none;
+  width: max-content;
+  max-width: 88%;
+  margin: 0;
+  padding: 12px 22px;
+  transform: translate(-50%, -50%);
+  border: 2px solid #e3bd28;
+  border-radius: 14px;
+  background: rgb(35 4 10 / 86%);
+  box-shadow: 0 5px 18px rgb(0 0 0 / 45%);
+  text-align: center;
+  font-size: clamp(20px, 4vw, 34px);
+  font-weight: 700;
 }
 
-.stand-button {
-  background-image: url("../img/png/button_stand.png");
+.game-status:not(:empty) {
+  display: block;
 }
 
-.hit-button {
-  background-image: url("../img/png/button_hit.png");
+/* Esconde o debug visualmente sem o remover do DOM usado pelo JavaScript. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
-.double-button {
-  background-image: url("../img/png/button_double.png");
+/* Tablets: aumenta as zonas de cartas e aproxima os controlos. */
+@media (max-width: 900px) {
+  .dealer-area { left: 28%; width: 44%; }
+  .player-area { left: 16%; width: 68%; }
+  .game-actions { width: min(66%, 500px); }
+  .table-info { right: 4%; }
+  .new-game { left: 4%; }
 }
 
-.game-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ECRÃS MAIS PEQUENOS */
+/* Telemóveis verticais: organiza o topo em linhas para evitar sobreposições. */
 @media (max-width: 650px) {
-  body {
-    overflow: auto;
-  }
-
   .game-table {
-    min-height: 680px;
+    height: max(100svh, 760px);
+    min-height: 760px;
     background-size: auto 100%;
   }
 
-  .dealer-area {
-    top: 25%;
-    left: 15%;
-    width: 70%;
+  .new-game {
+    top: 3.5%;
+    left: 5%;
+    width: 38%;
+    height: 46px;
+    font-size: clamp(13px, 4vw, 18px);
   }
 
-  .player-area {
-    top: 53%;
-    left: 8%;
-    width: 84%;
+  /* A aposta e o saldo ficam abaixo de New Game, numa área própria. */
+  .table-info {
+    top: 11%;
+    right: 5%;
+    left: 5%;
+    width: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px 14px;
+    font-size: clamp(13px, 3.8vw, 17px);
   }
 
-  .game-actions {
-    bottom: 8%;
-    width: 76%;
+  .table-info p { margin: 0; }
+  .table-info label { display: inline; margin: 0 4px 0 0; }
+  .table-info input { width: 76px; padding: 3px 5px; font-size: 14px; }
+
+  .dealer-area { top: 24%; left: 5%; width: 90%; }
+  .player-area { top: 51%; left: 5%; width: 90%; }
+
+  .card-row {
+    min-height: 92px;
     gap: 8px;
   }
+
+  .playing-card {
+    width: clamp(42px, 13vw, 62px);
+    max-height: 90px;
+  }
+
+  .shoe { top: 40%; left: 3%; width: 62px; height: 78px; }
+  .game-actions { bottom: 7%; width: 88%; gap: 7px; }
+  .game-button { height: 44px; font-size: clamp(12px, 3.5vw, 17px); }
+}
+
+/* Em ecrãs muito estreitos, o campo de aposta passa para a linha seguinte. */
+@media (max-width: 380px) {
+  .table-info { top: 10%; width: auto; gap: 3px 10px; }
+  .table-info p { flex-basis: 42%; text-align: center; }
+  .table-info label { flex-basis: 100%; text-align: center; }
+  .table-info input { width: 92px; }
+  .dealer-area { top: 27%; }
+  .player-area { top: 53%; }
+}
+
+/* Em ecrãs baixos na horizontal, permite scroll em vez de cortar a mesa. */
+@media (max-height: 560px) and (min-width: 651px) {
+  .game-table { height: 620px; min-height: 620px; }
 }

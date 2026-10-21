@@ -23,7 +23,7 @@ class BettingBalance {
         const bet = Number(betInput.value);
         if (!Number.isSafeInteger(bet) || bet < this.minimumBet) {
             document.getElementById('game_status').textContent =
-                `Enter a whole-number bet of at least $${this.minimumBet}.`;
+                `Enter a whole-number bet of at least €${this.minimumBet}.`;
             return false;
         }
         if (bet > this.balance) {
@@ -72,9 +72,9 @@ class BettingBalance {
     }
 
     updateDisplay() {
-        const formatMoney = amount => new Intl.NumberFormat(undefined, {
+        const formatMoney = amount => new Intl.NumberFormat('pt-PT', {
             style: 'currency',
-            currency: 'USD',
+            currency: 'EUR',
             maximumFractionDigits: 0
         }).format(amount);
         const betInput = document.getElementById('bet-amount');

@@ -4,7 +4,11 @@ let game = null; // Stores the current instance of the game
 let roundSettled = false; // Evita liquidar a mesma aposta mais do que uma vez.
 
 function playCardSound() {
-    const sound = document.getElementById('new-card-sound').cloneNode();
+    // Reutiliza um único elemento de áudio para evitar várias cópias a tocar
+    // ao mesmo tempo quando uma ação distribui várias cartas rapidamente.
+    const sound = document.getElementById('new-card-sound');
+    sound.pause();
+    sound.currentTime = 0;
     sound.play().catch(error => console.error('Could not play card sound:', error));
 }
 
@@ -78,13 +82,11 @@ function newGame() {
 
     clearPage();
     game = new Blackjack(); // Creates a new instance of the Blackjack game
+    // Um único efeito sonoro representa a distribuição inicial das quatro cartas.
     playCardSound();
     game.dealerMove();
-    playCardSound();
     game.playerMove();
-    playCardSound();
     game.dealerMove();
-    playCardSound();
     const state = game.playerMove();
 
     updateDealer(state);
@@ -248,7 +250,6 @@ function dealerFinish() {
     debug(game);
 }
 
-//TODO: Implement this method.
 /**
  * Prints the card in the graphical interface.
  * @param {HTMLElement} element - The element where the card will be displayed.

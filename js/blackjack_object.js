@@ -30,7 +30,6 @@ class Blackjack {
         this.deck = this.shuffle(this.newDeck()); // Create and shuffle a new deck
     }
 
-    //TODO: Implement this method
     /**
      * Creates a new deck of cards.
      * @returns {Card[]} - An array of cards.
@@ -46,16 +45,16 @@ class Blackjack {
         return deck;
     }
 
-    //TODO: Implement this method
     /**
      * Shuffles the deck of cards.
      * @param {Card[]} deck - The deck of cards to be shuffled.
      * @returns {Card[]} - The shuffled deck.
      */
     shuffle(deck) {
-        // Cria um array de índices de 0 até ao tamanho do baralho - 1
+        // O enunciado pede índices de 1 a 52. Guardamos esses índices
+        // separadamente e subtraímos 1 ao aceder ao array (indexado desde 0).
         let indices = [];
-        for (let i = 0; i < deck.length; i++) {
+        for (let i = 1; i <= deck.length; i++) {
             indices.push(i);
         }
         
@@ -65,10 +64,10 @@ class Blackjack {
         for (let i = 0; i < deck.length; i++) {
             // Sorteia um índice aleatório dentro do array de índices disponíveis
             const randomIndex = Math.floor(Math.random() * indices.length);
-            const originalIndex = indices[randomIndex];
+            const originalIndex = indices[randomIndex]; // índice de 1 a 52
 
             // Vai buscar a carta correspondente ao índice sorteado e insere no novo baralho
-            shuffledDeck.push(deck[originalIndex]);
+            shuffledDeck.push(deck[originalIndex - 1]);
 
             // Remove o índice usado do array de índices para não ser sorteado novamente
             indices.splice(randomIndex, 1);
@@ -101,7 +100,6 @@ class Blackjack {
         this.dealerTurn = val; // Update the dealer's turn status
     }
 
-    //TODO: Implement this method
     /**
      * Calculates the total value of the provided cards.
      * @param {Card[]} cards - Array of cards to be evaluated.
@@ -137,7 +135,6 @@ class Blackjack {
         return totalPoints;
     }
 
-    //TODO: Implement this method
     /**
      * Executes the dealer's move by adding a card to the dealer's array.
      * @returns {Object} - The game state after the dealer's move.
@@ -152,7 +149,6 @@ class Blackjack {
         return this.getGameState();
     }
 
-    //TODO: Implement this method
     /**
      * Executes the player's move by adding a card to the player's array.
      * @returns {Object} - The game state after the player's move.
@@ -167,7 +163,6 @@ class Blackjack {
         return this.getGameState();
     }
 
-    //TODO: Implement this method
     /**
      * Checks the game state based on the dealer's and player's cards.
      * @returns {Object} - The updated game state.
