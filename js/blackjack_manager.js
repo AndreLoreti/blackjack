@@ -72,28 +72,124 @@ function clearPage() {
 }
 
 /**
+ * Cria a imagem de uma carta e anima-a desde o sapato até à mão indicada.
+ * A carta é colocada no destino antes da animação para reservar o seu espaço.
+ * @param {HTMLElement} element - Contentor da mão que recebe a carta.
+ * @param {Card|string} card - Carta a mostrar, ou "hidden" para o verso.
+ * @returns {Promise<HTMLImageElement>} A imagem da carta já colocada na mão.
+ */
+async function dealCardWithAnimation(element, card) {
+    const image = createCardImage(card);
+    // Aguarda o PNG para o browser já conhecer a altura real da carta.
+    if (typeof image.decode === 'function') {
+        await image.decode().catch(() => {});
+    }
+    image.style.visibility = 'hidden';
+    element.appendChild(image);
+
+    const shoe = document.querySelector('.shoe');
+    const sourceRect = shoe.getBoundingClientRect();
+    const cardRect = image.getBoundingClientRect();
+    const offsetX = sourceRect.left + sourceRect.width / 2 - (cardRect.left + cardRect.width / 2);
+    const offsetY = sourceRect.top + sourceRect.height / 2 - (cardRect.top + cardRect.height / 2);
+
+    image.style.visibility = 'visible';
+    if (typeof image.animate !== 'function') return image;
+
+    const animation = image.animate([
+        {
+            opacity: 0.35,
+            transform: `translate(${offsetX}px, ${offsetY}px) scale(0.45) rotate(-12deg)`
+        },
+        { opacity: 1, transform: 'translate(0, 0) scale(1) rotate(0)' }
+    ], {
+        duration: 520,
+        easing: 'cubic-bezier(0.2, 0.75, 0.25, 1)',
+        fill: 'both'
+    });
+
+    await animation.finished;
+    animation.cancel(); // A imagem fica no destino sem manter estilos temporários.
+    return image;
+}
+
+/** Atualiza os valores mostrados durante a distribuição inicial. */
+function updateInitialDealScores(state) {
+    const dealerCards = game.getDealerCards();
+    const dealerPoints = !game.dealerTurn && !state.gameEnded
+        ? '?'
+        : game.getCardsValue(dealerCards);
+
+    document.getElementById('dealer').textContent = `Dealer: ${dealerPoints}`;
+    document.getElementById('player').textContent =
+        `Hand: ${game.getCardsValue(game.getPlayerCards())}`;
+}
+
+/**
  * Starts a new game of Blackjack.
  */
-function newGame() {
+async function newGame() {
     if (!bettingSystem.startRound()) return;
 
     // A próxima partida ainda não foi liquidada.
     roundSettled = false;
 
+    // Mantém os controlos bloqueados até as quatro cartas iniciais chegarem.
+    document.getElementById('new_game').disabled = true;
+    document.getElementById('card').disabled = true;
+    document.getElementById('stand').disabled = true;
+    document.getElementById('double_down').disabled = true;
+
     clearPage();
     game = new Blackjack(); // Creates a new instance of the Blackjack game
-    // Um único efeito sonoro representa a distribuição inicial das quatro cartas.
+    // Um único som acompanha a distribuição animada das quatro cartas iniciais.
     playCardSound();
-    game.dealerMove();
-    game.playerMove();
-    game.dealerMove();
-    const state = game.playerMove();
 
-    updateDealer(state);
-    updatePlayer(state);
+    const dealerElement = document.getElementById('dealer-cards');
+    const playerElement = document.getElementById('player-cards');
+    let hiddenDealerCard = null;
+    let state;
+
+    // Distribui alternadamente, uma carta de cada vez, como numa mesa real.
+    const initialDeal = [
+        { hand: 'dealer' },
+        { hand: 'player' },
+        { hand: 'dealer' },
+        { hand: 'player' }
+    ];
+
+    for (const turn of initialDeal) {
+        if (turn.hand === 'dealer') {
+            state = game.dealerMove();
+            const cards = game.getDealerCards();
+            const isHoleCard = cards.length === 2 && !state.gameEnded;
+            const image = await dealCardWithAnimation(
+                dealerElement,
+                isHoleCard ? 'hidden' : cards[cards.length - 1]
+            );
+            if (isHoleCard) hiddenDealerCard = image;
+        } else {
+            state = game.playerMove();
+            const cards = game.getPlayerCards();
+            await dealCardWithAnimation(playerElement, cards[cards.length - 1]);
+        }
+
+        updateInitialDealScores(state);
+        debug(game);
+    }
+
+    // Se a mão inicial do jogador já terminou a partida, revela a carta escondida.
+    if (state.gameEnded && hiddenDealerCard) {
+        const dealerCards = game.getDealerCards();
+        hiddenDealerCard.replaceWith(createCardImage(dealerCards[1]));
+        updateInitialDealScores(state);
+        finalScore(state);
+        finalizeButtons(state);
+    } else {
+        buttonsInitialization();
+    }
+
     debug(game);
-    buttonsInitialization();
-    if (state.gameEnded) finalizeButtons();
 }
 
 /**
@@ -256,10 +352,7 @@ function dealerFinish() {
  * @param {Card} card - The card to be displayed.
  * @param {boolean} [replace=false] - Indicates whether to replace the existing image.
  */
-function printCard(element, card, replace = false) {
-    // Quando replace é true, substitui as imagens anteriores deste contentor.
-    if (replace) element.replaceChildren();
-
+function createCardImage(card) {
     const image = document.createElement('img');
     image.className = 'playing-card';
 
@@ -280,6 +373,13 @@ function printCard(element, card, replace = false) {
         image.alt = formatCard(card);
     }
 
+    return image;
+}
+
+function printCard(element, card, replace = false) {
+    // Quando replace é true, substitui as imagens anteriores deste contentor.
+    if (replace) element.replaceChildren();
+
     // Adiciona a imagem ao contentor de cartas do dealer ou do jogador.
-    element.appendChild(image);
+    element.appendChild(createCardImage(card));
 }
