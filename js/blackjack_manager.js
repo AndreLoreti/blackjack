@@ -235,12 +235,12 @@ function formatCard(card) {
  * Updates the dealer's state in the game.
  * @param {Object} state - The current state of the game.
  */
-function updateDealer(state = game.getGameState()) {
+function updateDealer(state = game.getGameState(), cardsAlreadyRendered = false) {
     const cards = game.getDealerCards();
     const cardsElement = document.getElementById('dealer-cards');
 
     // Se existir a zona visual, desenha cada carta como imagem.
-    if (cardsElement) {
+    if (cardsElement && !cardsAlreadyRendered) {
         cardsElement.replaceChildren();
         cards.forEach((card, index) => {
             const hidden = !game.dealerTurn && !state.gameEnded && index === 1;
@@ -264,12 +264,12 @@ function updateDealer(state = game.getGameState()) {
  * Updates the player's state in the game.
  * @param {Object} state - The current state of the game.
  */
-function updatePlayer(state = game.getGameState()) {
+function updatePlayer(state = game.getGameState(), cardsAlreadyRendered = false) {
     const cards = game.getPlayerCards();
     const cardsElement = document.getElementById('player-cards');
 
     // Desenha todas as cartas do jogador, que estão sempre visíveis.
-    if (cardsElement) {
+    if (cardsElement && !cardsAlreadyRendered) {
         cardsElement.replaceChildren();
         cards.forEach(card => printCard(cardsElement, card));
     }
@@ -287,10 +287,15 @@ function updatePlayer(state = game.getGameState()) {
  * Causes the dealer to draw a new card.
  * @returns {Object} - The game state after the dealer's move.
  */
-function dealerNewCard() {
+async function dealerNewCard() {
     playCardSound();
     const state = game.dealerMove();
-    updateDealer(state);
+    const cards = game.getDealerCards();
+    await dealCardWithAnimation(
+        document.getElementById('dealer-cards'),
+        cards[cards.length - 1]
+    );
+    updateDealer(state, true);
     debug(game);
     return state;
 }
@@ -299,12 +304,26 @@ function dealerNewCard() {
  * Causes the player to draw a new card.
  * @returns {Object} - The game state after the player's move.
  */
-function playerNewCard() {
+async function playerNewCard() {
+    if (!game || game.getGameState().gameEnded) return;
+
+    // Evita iniciar outra jogada enquanto a carta atual ainda está a caminho.
+    document.getElementById('card').disabled = true;
+    document.getElementById('stand').disabled = true;
     document.getElementById('double_down').disabled = true;
     playCardSound();
     const state = game.playerMove();
-    updatePlayer(state);
+    const cards = game.getPlayerCards();
+    await dealCardWithAnimation(
+        document.getElementById('player-cards'),
+        cards[cards.length - 1]
+    );
+    updatePlayer(state, true);
     if (state.gameEnded) updateDealer(state); // Revela as cartas do dealer no fim.
+    else {
+        document.getElementById('card').disabled = false;
+        document.getElementById('stand').disabled = false;
+    }
     debug(game);
     return state;
 }
@@ -312,37 +331,46 @@ function playerNewCard() {
 /**
  * Draws exactly one card for the player, then finishes the player's turn.
  */
-function doubleDown() {
+async function doubleDown() {
     if (!game || game.getGameState().gameEnded || game.getPlayerCards().length !== 2) return;
     if (!bettingSystem.doubleBet()) return;
 
+    document.getElementById('card').disabled = true;
+    document.getElementById('stand').disabled = true;
     document.getElementById('double_down').disabled = true;
     playCardSound();
     const state = game.playerMove();
-    updatePlayer(state);
-    updateDealer(state);
+    const cards = game.getPlayerCards();
+    await dealCardWithAnimation(
+        document.getElementById('player-cards'),
+        cards[cards.length - 1]
+    );
+    updatePlayer(state, true);
     debug(game);
 
-    if (!state.gameEnded) dealerFinish();
+    if (state.gameEnded) updateDealer(state);
+    else await dealerFinish();
 }
 
 /**
  * Finishes the dealer's turn.
  */
-function dealerFinish() {
+async function dealerFinish() {
     if (!game) return;
 
+    document.getElementById('card').disabled = true;
+    document.getElementById('stand').disabled = true;
     document.getElementById('double_down').disabled = true;
     game.setDealerTurn(true);
     let state = game.getGameState();
 
+    // Revela a carta escondida antes de o dealer começar a comprar cartas.
+    updateDealer(state);
     while (!state.gameEnded) {
-        updateDealer(state);
-        state = dealerNewCard();
+        state = await dealerNewCard();
     }
 
-    updateDealer(state);
-    updatePlayer(state);
+    updatePlayer(state, true);
     debug(game);
 }
 
