@@ -46,8 +46,8 @@ body {
 
 .dealer-area {
   top: 12%;
-  left: 31%;
-  width: 38%;
+  left: 28%;
+  width: 44%;
 }
 
 .player-area {
@@ -70,6 +70,17 @@ body {
   align-items: flex-start;
   flex-wrap: wrap;
   gap: clamp(8px, 2vw, 30px);
+}
+
+/* A mão do dealer fica numa linha para não empurrar o título sobre o jogador. */
+.dealer-area .card-row {
+  flex-wrap: nowrap;
+  gap: clamp(5px, 1vw, 16px);
+}
+
+/* Permite reduzir as cartas do dealer se uma mão tiver muitas cartas. */
+.dealer-area .playing-card {
+  min-width: 0;
 }
 
 /* As imagens mantêm a proporção original das cartas PNG. */
@@ -95,7 +106,7 @@ body {
 .table-info {
   position: absolute;
   top: 10.5%;
-  right: 7.5%;
+  right: 3%;
   /* Reserva uma coluna estável: valores grandes quebram linha sem deslocar a mesa. */
   width: min(25%, 270px);
   min-width: 0;
@@ -244,10 +255,9 @@ body {
 
 /* Tablets: aumenta as zonas de cartas e aproxima os controlos. */
 @media (max-width: 900px) {
-  .dealer-area { left: 28%; width: 44%; }
   .player-area { left: 16%; width: 68%; }
   .game-actions { width: min(66%, 500px); }
-  .table-info { right: 4%; }
+  .table-info { right: 3%; }
   .new-game { left: 4%; }
 }
 
