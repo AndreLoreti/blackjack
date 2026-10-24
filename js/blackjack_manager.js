@@ -93,6 +93,8 @@ async function dealCardWithAnimation(element, card) {
     const offsetX = sourceRect.left + sourceRect.width / 2 - (cardRect.left + cardRect.width / 2);
     const offsetY = sourceRect.top + sourceRect.height / 2 - (cardRect.top + cardRect.height / 2);
 
+    // Cada carta toca o som no momento em que começa a deslocar-se.
+    playCardSound();
     image.style.visibility = 'visible';
     if (typeof image.animate !== 'function') return image;
 
@@ -142,8 +144,6 @@ async function newGame() {
 
     clearPage();
     game = new Blackjack(); // Creates a new instance of the Blackjack game
-    // Um único som acompanha a distribuição animada das quatro cartas iniciais.
-    playCardSound();
 
     const dealerElement = document.getElementById('dealer-cards');
     const playerElement = document.getElementById('player-cards');
@@ -288,7 +288,6 @@ function updatePlayer(state = game.getGameState(), cardsAlreadyRendered = false)
  * @returns {Object} - The game state after the dealer's move.
  */
 async function dealerNewCard() {
-    playCardSound();
     const state = game.dealerMove();
     const cards = game.getDealerCards();
     await dealCardWithAnimation(
@@ -311,7 +310,6 @@ async function playerNewCard() {
     document.getElementById('card').disabled = true;
     document.getElementById('stand').disabled = true;
     document.getElementById('double_down').disabled = true;
-    playCardSound();
     const state = game.playerMove();
     const cards = game.getPlayerCards();
     await dealCardWithAnimation(
@@ -338,7 +336,6 @@ async function doubleDown() {
     document.getElementById('card').disabled = true;
     document.getElementById('stand').disabled = true;
     document.getElementById('double_down').disabled = true;
-    playCardSound();
     const state = game.playerMove();
     const cards = game.getPlayerCards();
     await dealCardWithAnimation(
